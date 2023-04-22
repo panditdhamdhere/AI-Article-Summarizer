@@ -2,6 +2,7 @@ import React from "react";
 import { useState } from "react";
 import { useEffect } from "react";
 import { copy, linkIcon, tick } from "../assets";
+import { useLazyGetSummaryQuery } from "../services/article";
 
 const Demo = () => {
   const [article, setArticle] = useState({
@@ -9,9 +10,22 @@ const Demo = () => {
     summary: "",
   });
 
+  const [getSummary, { error, isFetching }] = useLazyGetSummaryQuery();
+
   const handleSubmit = async (event) => {
-alert("Submitted")
-  }
+event.preventDefault();
+
+    const { data } = await getSummary({
+      articleUrl: article.url,
+    });
+
+    if (data?.summary) {
+      const newArticle = { ...article, summary: data.summary };
+
+      setArticle(newArticle);
+      console.log(newArticle);
+    }
+  };
 
   return (
     <section className="mt-16 w-full max-w-xl">
@@ -30,7 +44,12 @@ alert("Submitted")
             type="url"
             placeholder="Idhar URL Chipka do 😡"
             value={article.url}
-            onChange={(event) => {}}
+            onChange={(event) =>
+              setArticle({
+                ...article,
+                url: event.target.value,
+              })
+            }
             required
             className="url_input peer"
           />
